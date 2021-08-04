@@ -22,7 +22,7 @@ import numpy as np
 from monai.metrics import compute_roc_auc
 from sklearn.metrics import cohen_kappa_score
 
-from gray_zone.models.coral import proba_to_label
+from gray_zone.models.coral import proba_to_label, label_to_levels
 
 
 def load_transforms(transforms_dict: dict):
@@ -87,6 +87,7 @@ def modify_label_outputs_for_model_type(model_type: str,
                                         outputs: any,
                                         labels: torch.Tensor,
                                         act: Activations,
+                                        n_class: int,
                                         val: bool = False):
     """ Some model type requires specific data format. This functions modifies the label and model output to accomodate
     these cases. """

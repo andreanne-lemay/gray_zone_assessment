@@ -11,6 +11,7 @@ from gray_zone.models.model import get_model
 from gray_zone.train import train
 from gray_zone.evaluate import evaluate_model
 from gray_zone.loss import get_loss
+from gray_zone.records import get_job_record, save_job_record
 
 def _run_model(output_path: str,
                param_path: str,
@@ -20,7 +21,6 @@ def _run_model(output_path: str,
                image_colname: str,
                split_colname: str,
                patient_colname: str,
-               model_type: str,
                transfer_learning: bool) -> None:
     """Function version of train"""
     # Create output directory if it doesn't exist
@@ -39,7 +39,7 @@ def _run_model(output_path: str,
 
     # Record environment and CLI
     job_record = get_job_record(param_dict['seed'])
-    save_job_record(output_dir, record=job_record, name='train_record.json')
+    save_job_record(output_path, record=job_record, name='train_record.json')
 
     # Convert transforms from config file
     train_transforms = load_transforms(param_dict["train_transforms"])
@@ -85,13 +85,13 @@ def _run_model(output_path: str,
           output_path=output_path,
           scheduler=scheduler,
           n_class=param_dict['n_class'],
-          model_type=model_type,
+          model_type=param_dict['model_type'],
           val_metric=param_dict['val_metric'])
 
     df = evaluate_model(model=model,
                         loader=test_loader,
                         output_path=output_path,
-                        device=device,
+                        device=param_dict['device'],
                         act=act,
                         transforms=val_transforms,
                         df=test_df,
@@ -110,9 +110,7 @@ def _run_model(output_path: str,
                    "with `val`,`train`, or `test`")
 @click.option('--patient-colname', '-pc', default='patient',
               help='Column name in csv associated to the patient id.')
-@click.option('--model-type', '-m', default='classification',
-              help="Choice between 'classification', 'ordinal', 'regression'.")
-@click.option('--transfer-learning', '-tf', default=False, help="Fine-tune training from other model.")
+@click.option('--transfer-learning', '-tf', default=False, is_flag=True, help="Fine-tune training from other model.")
 def run_model(output_path: str,
               param_path: str,
               data_path: str,
@@ -121,8 +119,10 @@ def run_model(output_path: str,
               image_colname: str,
               split_colname: str,
               patient_colname: str,
-              model_type: str,
               transfer_learning: bool) -> None:
     """Train deep learning model using CLI. """
     _run_model(output_path, param_path, data_path, csv_path, label_colname, image_colname, split_colname,
-               patient_colname, model_type, transfer_learning)
+               patient_colname, transfer_learning)
+
+if __name__ == "__main__":
+    run_model()

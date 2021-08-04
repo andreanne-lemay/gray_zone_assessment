@@ -21,14 +21,14 @@ def get_model(architecture: str,
         resnet = getattr(dropout_resnet, architecture) if float(dropout_rate) > 0 else getattr(torchvision.models,
                                                                                                architecture)
         model = resnet(pretrained=True)
-        model.fc = torch.nn.Linear(model.fc.in_features, out_channels)
+        model.fc = torch.nn.Linear(model.fc.in_features, output_channels)
         model = model.to(device)
 
     elif 'densenet' in architecture:
         densenet = getattr(monai.networks.nets, architecture)
         model = densenet(spatial_dims=2,
                          in_channels=3,
-                         out_channels=out_channels,
+                         out_channels=output_channels,
                          dropout_prob=float(dropout_rate),
                          pretrained=True).to(device)
     else:
@@ -38,7 +38,7 @@ def get_model(architecture: str,
     if model_type == 'ordinal':
         model = torch.nn.Sequential(
             model,
-            CoralLayer(out_channels, n_class)
+            CoralLayer(output_channels, n_class)
         )
         model = model.to(device)
 

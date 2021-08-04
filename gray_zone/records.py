@@ -10,10 +10,9 @@ from typing import Any, Dict, Optional
 import click
 
 import git
+import gray_zone
 
 from numpy.random import randint, seed
-
-import ml_proj
 
 
 def is_slurm_job() -> bool:
@@ -73,7 +72,7 @@ def get_job_record(random_seed: Optional[int] = None) -> Dict[str, Any]:
     record['EXECUTION_TIME'] = str(datetime.datetime.now())
 
     # Get the current git commit, branch and state
-    repo = git.Repo(ml_proj.__path__[0], search_parent_directories=True)  # type: ignore  # mypy issue #1422
+    repo = git.Repo(gray_zone.__path__[0], search_parent_directories=True)  # type: ignore  # mypy issue #1422
     try:
         record['GIT_ACTIVE_BRANCH'] = str(repo.active_branch)
     except TypeError:

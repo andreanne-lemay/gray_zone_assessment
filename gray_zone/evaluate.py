@@ -16,6 +16,7 @@ def evaluate_model(model: torch.nn.Module,
                    df: pd.DataFrame = None,
                    is_mc: bool = True,
                    image_colname: str = 'image') -> pd.DataFrame:
+    """ Evaluate model on test set. """
     best_model_path = os.path.join(output_path, "best_metric_model.pth")
 
     model.load_state_dict(torch.load(best_model_path, map_location=device))
@@ -72,6 +73,7 @@ def monte_carlo_it(model: torch.nn.Module,
                    n_it: int,
                    act: Activations,
                    transforms: Compose = None) -> list:
+    """ Activate dropout and generate n_it Monte Carlo iterations. """
     model = copy.deepcopy(model)
     input_data = copy.deepcopy(input_data)
     pred_lst = []

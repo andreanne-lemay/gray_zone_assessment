@@ -30,6 +30,7 @@ class KappaLoss():
 
 def get_loss(loss_id: str,
              n_class: int):
+    """ Get loss function from loss id. Choices between: 'ce', 'mse', 'l1', 'bce', 'mse', 'coral' """
     loss = None
     if loss_id == 'coral':
         loss = coral_loss

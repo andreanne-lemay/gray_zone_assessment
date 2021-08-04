@@ -27,7 +27,7 @@ def train(model: [torch.Tensor],
           n_class: int,
           model_type: str = 'classification',
           val_metric: str = None):
-
+    """ Training loop. """
     best_metric = -np.inf
     best_metric_epoch = -1
     epoch_loss_values = []

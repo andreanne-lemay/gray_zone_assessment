@@ -22,7 +22,7 @@ def _run_model(output_path: str,
                split_colname: str,
                patient_colname: str,
                transfer_learning: bool) -> None:
-    """Function version of train"""
+    """ Run deep learning model for training and evaluation for classification tasks. """
     # Create output directory if it doesn't exist
     if not os.path.isdir(output_path):
         os.makedirs(output_path)

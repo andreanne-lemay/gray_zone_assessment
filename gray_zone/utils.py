@@ -37,7 +37,7 @@ def load_transforms(transforms_dict: dict):
 def get_label(pred: np.ndarray,
               model_type: str,
               n_class: int) -> np.ndarray:
-    """ From prediction get discrete label. """
+    """ From model predictions get discrete label. """
     if model_type == 'ordinal':
         return proba_to_label(pred)
 
@@ -69,6 +69,7 @@ def get_validation_metric(val_metric: str,
                           y_pred: np.ndarray,
                           val_loss: any,
                           acc_metric: float):
+    """ From validation metric id, return validation metric value. """
     if val_metric == 'kappa':
         metric_value = cohen_kappa_score(y_pred_label, y_true, weights='linear')
     elif val_metric == 'auc':
@@ -87,6 +88,8 @@ def modify_label_outputs_for_model_type(model_type: str,
                                         labels: torch.Tensor,
                                         act: Activations,
                                         val: bool = False):
+    """ Some model type requires specific data format. This functions modifies the label and model output to accomodate
+    these cases. """
     # Convert GT into ordinal format
     if model_type == 'ordinal':
         labels = label_to_levels(labels, num_classes=n_class)

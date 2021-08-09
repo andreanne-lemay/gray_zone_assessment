@@ -88,10 +88,10 @@ def train(model: [torch.Tensor],
 
             # Ordinal models require different data encoding
             if model_type == 'ordinal':
-                y = get_label(y, arch_type=model_type, argmax=argmax)
+                y = get_label(y, model_type=model_type, n_class=n_class)
 
             # Compute accuracy and validation metric
-            y_pred_value = get_label(y_pred, arch_type=arch_type, argmax=argmax, n_class=n_class)
+            y_pred_value = get_label(y_pred, model_type=model_type, n_class=n_class)
             acc_value = y_pred_value.flatten() == y.flatten()
             acc_metric = acc_value.sum() / len(acc_value)
 

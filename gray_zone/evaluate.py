@@ -45,8 +45,7 @@ def evaluate_model(model: torch.nn.Module,
             if is_mc:
                 mc_pred = {}
                 for unc_type in UNCERTAINTY_LST:
-                    mc_pred[unc_type] = monte_carlo_it(model, test_images, 50, act, unc_type=unc_type,
-                                                       transforms=transforms)
+                    mc_pred[unc_type] = monte_carlo_it(model, test_images, 50, act)
                     for i in range(len(pred_prob)):
                         mc_preds[unc_type].append([p[i] for p in mc_pred[unc_type]])
 
@@ -71,8 +70,7 @@ def evaluate_model(model: torch.nn.Module,
 def monte_carlo_it(model: torch.nn.Module,
                    input_data: torch.Tensor,
                    n_it: int,
-                   act: Activations,
-                   transforms: Compose = None) -> list:
+                   act: Activations) -> list:
     """ Activate dropout and generate n_it Monte Carlo iterations. """
     model = copy.deepcopy(model)
     input_data = copy.deepcopy(input_data)

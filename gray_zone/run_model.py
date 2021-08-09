@@ -13,6 +13,7 @@ from gray_zone.evaluate import evaluate_model
 from gray_zone.loss import get_loss
 from gray_zone.records import get_job_record, save_job_record
 
+
 def _run_model(output_path: str,
                param_path: str,
                data_path: str,
@@ -46,20 +47,20 @@ def _run_model(output_path: str,
     val_transforms = load_transforms(param_dict["val_transforms"])
 
     # Get train, val, test loaders and test dataframe
-    train_loader, val_loader, test_loader, test_df = loader(data_path=data_path,
-                                                            output_path=output_path,
-                                                            train_transforms=train_transforms,
-                                                            val_transforms=val_transforms,
-                                                            metadata_path=csv_path,
-                                                            label_colname=label_colname,
-                                                            image_colname=image_colname,
-                                                            split_colname=split_colname,
-                                                            patient_colname=patient_colname,
-                                                            train_frac=param_dict['train_frac'],
-                                                            test_frac=param_dict['test_frac'],
-                                                            seed=param_dict['seed'],
-                                                            batch_size=param_dict['batch_size'],
-                                                            balanced=param_dict['sampling'])
+    train_loader, val_loader, test_loader, test_df, weights = loader(data_path=data_path,
+                                                                     output_path=output_path,
+                                                                     train_transforms=train_transforms,
+                                                                     val_transforms=val_transforms,
+                                                                     metadata_path=csv_path,
+                                                                     label_colname=label_colname,
+                                                                     image_colname=image_colname,
+                                                                     split_colname=split_colname,
+                                                                     patient_colname=patient_colname,
+                                                                     train_frac=param_dict['train_frac'],
+                                                                     test_frac=param_dict['test_frac'],
+                                                                     seed=param_dict['seed'],
+                                                                     batch_size=param_dict['batch_size'],
+                                                                     balanced=param_dict['is_weighted_sampling'])
 
     # Get model
     model, act = get_model(architecture=param_dict['architecture'],
@@ -72,7 +73,8 @@ def _run_model(output_path: str,
 
     optimizer = torch.optim.Adam(model.parameters(), param_dict['lr'])
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=True)
-    loss_function = get_loss(param_dict['loss'], param_dict['n_class'])
+    loss_function = get_loss(param_dict['loss'], param_dict['n_class'], param_dict['is_weighted_loss'],
+                             weights, param_dict['device'])
 
     train(model=model,
           act=act,
@@ -123,6 +125,7 @@ def run_model(output_path: str,
     """Train deep learning model using CLI. """
     _run_model(output_path, param_path, data_path, csv_path, label_colname, image_colname, split_colname,
                patient_colname, transfer_learning)
+
 
 if __name__ == "__main__":
     run_model()

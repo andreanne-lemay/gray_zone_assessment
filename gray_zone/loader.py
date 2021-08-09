@@ -70,38 +70,37 @@ def loader(data_path: str,
     split_df = split_dataset(output_path, train_frac=train_frac, test_frac=test_frac,
                              seed=seed, metadata_path=metadata_path, split_colname=split_colname,
                              patient_colname=patient_colname)
-    train_loader, val_loader, test_loader = None, None, None
+    train_loader, val_loader, test_loader, weights = None, None, None, None
     df_train = split_df[split_df[split_colname] == "train"]
     if len(df_train):
-        sampler = get_balanced_sampler(df_train, label_colname) if balanced else None
+        sampler, weights = get_balanced_sampler(df_train, label_colname)
         shuffle = not balanced
         train_ds = Dataset(df_train, data_path, train_transforms, label_colname, image_colname)
         train_loader = torch.utils.data.DataLoader(
-            train_ds, batch_size=batch_size, shuffle=shuffle, num_workers=10, sampler=sampler)
+            train_ds, batch_size=batch_size, shuffle=shuffle, num_workers=10, sampler=sampler if balanced else None)
 
     df_val = split_df[split_df[split_colname] == "val"]
     if len(df_val):
-        sampler = get_balanced_sampler(df_val, label_colname) if balanced else None
+        sampler, _ = get_balanced_sampler(df_val, label_colname)
         val_ds = Dataset(df_val, data_path, val_transforms, label_colname, image_colname)
         val_loader = torch.utils.data.DataLoader(
-            val_ds, batch_size=batch_size, num_workers=10, sampler=sampler)
+            val_ds, batch_size=batch_size, num_workers=10, sampler=sampler if balanced else None)
 
     df_test = split_df[split_df[split_colname] == "test"]
     if len(df_test):
         test_ds = Dataset(df_test, data_path, val_transforms, label_colname, image_colname)
-        test_loader = torch.utils.data.DataLoader(
-            test_ds, batch_size=batch_size, num_workers=10)
-    return train_loader, val_loader, test_loader, df_test
+        test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size, num_workers=10)
+    return train_loader, val_loader, test_loader, df_test, weights
 
 
 def get_balanced_sampler(split_df: pd.DataFrame,
                          label_name: str):
     """ Balances the sampling of classes to have equal representation. """
     labels, count = np.unique(split_df[label_name], return_counts=True)
-    weights = (1 / torch.Tensor(count)).double()
-    sample_weights = torch.tensor([weights[l] for l in split_df[label_name]]).double()
+    weights = (1 / torch.Tensor(count)).float()
+    sample_weights = torch.tensor([weights[l] for l in split_df[label_name]]).float()
     sampler = torch.utils.data.sampler.WeightedRandomSampler(sample_weights, len(sample_weights))
-    return sampler
+    return sampler, weights
 
 
 def split_dataset(output_path: str,

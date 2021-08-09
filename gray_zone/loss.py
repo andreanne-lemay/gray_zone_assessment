@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import torch
 from gray_zone.models.coral import coral_loss
 import numpy as np
@@ -29,13 +30,18 @@ class KappaLoss():
 
 
 def get_loss(loss_id: str,
-             n_class: int):
+             n_class: int,
+             is_weighted: bool = False,
+             weights: torch.Tensor = None,
+             device: str = None):
     """ Get loss function from loss id. Choices between: 'ce', 'mse', 'l1', 'bce', 'mse', 'coral' """
     loss = None
+    weights = weights.to(device) if is_weighted else None
+
     if loss_id == 'coral':
         loss = coral_loss
     elif loss_id == 'ce':
-        loss = torch.nn.CrossEntropyLoss()
+        loss = torch.nn.CrossEntropyLoss(weight=weights)
     elif loss_id == 'mse':
         loss = torch.nn.MSELoss()
     elif loss_id == 'qwk':

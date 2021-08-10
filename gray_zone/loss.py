@@ -51,6 +51,6 @@ def get_loss(loss_id: str,
     elif loss_id == 'bce':
         loss = torch.nn.BCELoss()
     else:
-        raise ValueError("Invalid loss function id. Choices: 'ce', 'mse', 'l1', 'bce', 'mse', 'coral'")
+        raise ValueError("Invalid loss function id. Choices: 'ce', 'mse', 'l1', 'bce', 'qwk', 'coral'")
 
     return loss

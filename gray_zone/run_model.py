@@ -112,8 +112,8 @@ def _run_model(output_path: str,
                    "with `val`,`train`, or `test`")
 @click.option('--patient-colname', '-pc', default='patient',
               help='Column name in csv associated to the patient id.')
-@click.option('--transfer-learning', '-tf', default=None, help="Path to model for fine-tune training (i.e., start "
-                                                               "training with weights from other model.)")
+@click.option('--transfer-learning', '-tf', default=None, help="Path to model (.pth) for fine-tune training (i.e., "
+                                                               "start training with weights from other model.)")
 def run_model(output_path: str,
               param_path: str,
               data_path: str,

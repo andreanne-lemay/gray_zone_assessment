@@ -72,8 +72,8 @@ def train(model: [torch.Tensor],
                 )
 
                 outputs = model(val_images)
-                outputs, labels = modify_label_outputs_for_model_type(model_type, outputs, labels, act, n_class,
-                                                                      val=True)
+                outputs, val_labels = modify_label_outputs_for_model_type(model_type, outputs, val_labels, act, n_class,
+                                                                          val=True)
 
                 val_loss += loss_function(outputs, val_labels)
                 y_pred = torch.cat([y_pred, outputs], dim=0)

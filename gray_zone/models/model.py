@@ -13,7 +13,7 @@ def get_model(architecture: str,
               dropout_rate: float,
               n_class: int,
               device: str,
-              transfer_learning: bool,
+              transfer_learning: str,
               output_dir: str):
     """ Init model """
     output_channels, act = get_model_type_params(model_type, n_class)
@@ -43,9 +43,8 @@ def get_model(architecture: str,
         model = model.to(device)
 
     # Transfer weights if transfer learning
-    if transfer_learning:
-        best_model_path = os.path.join(output_dir, "best_metric_model.pth")
-        pretrained_dict = {k: v for k, v in torch.load(best_model_path, map_location=device).items() if
+    if transfer_learning is not None:
+        pretrained_dict = {k: v for k, v in torch.load(transfer_learning, map_location=device).items() if
                            k in model.state_dict()
                            and v.size() == model.state_dict()[k].size()}
         model.state_dict().update(pretrained_dict)

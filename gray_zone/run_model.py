@@ -22,7 +22,7 @@ def _run_model(output_path: str,
                image_colname: str,
                split_colname: str,
                patient_colname: str,
-               transfer_learning: bool) -> None:
+               transfer_learning: str) -> None:
     """ Run deep learning model for training and evaluation for classification tasks. """
     # Create output directory if it doesn't exist
     if not os.path.isdir(output_path):
@@ -112,7 +112,8 @@ def _run_model(output_path: str,
                    "with `val`,`train`, or `test`")
 @click.option('--patient-colname', '-pc', default='patient',
               help='Column name in csv associated to the patient id.')
-@click.option('--transfer-learning', '-tf', default=False, is_flag=True, help="Fine-tune training from other model.")
+@click.option('--transfer-learning', '-tf', default=None, help="Path to model for fine-tune training (i.e., start "
+                                                               "training with weights from other model.)")
 def run_model(output_path: str,
               param_path: str,
               data_path: str,
@@ -121,7 +122,7 @@ def run_model(output_path: str,
               image_colname: str,
               split_colname: str,
               patient_colname: str,
-              transfer_learning: bool) -> None:
+              transfer_learning: str) -> None:
     """Train deep learning model using CLI. """
     _run_model(output_path, param_path, data_path, csv_path, label_colname, image_colname, split_colname,
                patient_colname, transfer_learning)

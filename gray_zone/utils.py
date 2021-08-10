@@ -21,6 +21,7 @@ import torch
 import numpy as np
 from monai.metrics import compute_roc_auc
 from sklearn.metrics import cohen_kappa_score
+from sklearn.preprocessing import label_binarize
 
 from gray_zone.models.coral import proba_to_label, label_to_levels
 
@@ -73,7 +74,12 @@ def get_validation_metric(val_metric: str,
     if val_metric == 'kappa':
         metric_value = cohen_kappa_score(y_pred_label, y_true, weights='linear')
     elif val_metric == 'auc':
-        metric_value = compute_roc_auc(torch.tensor(y_pred), torch.tensor(y_true))
+        metric_value = 0
+        n_class = y_pred.shape[-1]
+        for i in range(n_class):
+            metric_value += compute_roc_auc(torch.tensor(y_pred[:, i]),
+                                            torch.tensor(label_binarize(y_true, classes=np.arange(n_class))[:, i]))
+        metric_value /= n_class
     elif val_metric == 'val_loss':
         metric_value = -val_loss.item()
     # Default validation metric accuracy

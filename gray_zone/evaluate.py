@@ -57,8 +57,9 @@ def evaluate_model(model: torch.nn.Module,
                 pred_dict["mc_" + unc_type + "_" + str(mc_it)] = [p[mc_it] for p in mc_preds[unc_type]]
     pred_df = pd.DataFrame().from_dict(pred_dict)
 
-    # Join predictions to test metadata for analysis
+    # Join predictions to test metadata for analysis and remove unnamed columns
     df = df.join(pred_df.set_index(image_colname), on=image_colname)
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
     # Save results in csv file
     predictions_path = os.path.join(output_path, "predictions.csv")

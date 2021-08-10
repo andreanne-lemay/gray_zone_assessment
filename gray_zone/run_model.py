@@ -35,7 +35,8 @@ def _run_model(output_path: str,
 
     # Save configuration file in output directory
     param_dict = json.load(open(param_path, 'r'))
-    param_dict['n_class'] = int(pd.read_csv(csv_path)[label_colname].max() + 1)
+    df = pd.read_csv(csv_path)
+    param_dict['n_class'] = int(df[df[split_colname == 'train']][label_colname].max() + 1)
     json.dump(param_dict, open(os.path.join(output_path, "params.json"), 'w'), indent=4)
 
     # Record environment and CLI

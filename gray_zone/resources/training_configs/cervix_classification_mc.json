@@ -6,7 +6,7 @@
     "lr": 1e-5,
     "n_epochs": 75,
     "device": "cuda:0",
-    "val_metric": "auc",
+    "val_metric": "custom_cervix",
     "dropout_rate": 0.2,
     "is_weighted_loss": false,
     "is_weighted_sampling": false,

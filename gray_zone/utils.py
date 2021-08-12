@@ -69,7 +69,9 @@ def get_validation_metric(val_metric: str,
                           y_true: np.ndarray,
                           y_pred: np.ndarray,
                           val_loss: any,
-                          acc_metric: float):
+                          acc_metric: float,
+                          model_type: str,
+                          n_class: int = None):
     """ From validation metric id, return validation metric value. """
     if val_metric == 'kappa':
         metric_value = cohen_kappa_score(y_pred_label, y_true, weights='linear')
@@ -83,6 +85,49 @@ def get_validation_metric(val_metric: str,
     elif val_metric == 'val_loss':
         metric_value = -val_loss.item()
     # Default validation metric accuracy
+    elif val_metric == 'custom_cervix':
+        if model_type == 'regression':
+            if n_class == 2:
+                metric_value = compute_roc_auc(torch.tensor(y_pred), torch.tensor(y_true))
+            else:
+                norm_score = y_pred
+                multi_score = np.zeros((len(norm_score), 3))
+                multi_score[:, 0] = 1 - norm_score.flatten()
+                multi_score[:, 2] = norm_score.flatten()
+                metric_value = (compute_roc_auc(torch.tensor(multi_score[:, 0]),
+                                                torch.tensor(label_binarize(y_true, classes=list(range(n_class)))[:, 0])) +
+                                compute_roc_auc(torch.tensor(multi_score[:, n_class - 1]),
+                                                torch.tensor(label_binarize(y_true, classes=list(range(n_class)))[:,
+                                                             n_class - 1]))) / 2
+        elif model_type == 'ordinal':
+
+            score = np.zeros((y_pred.shape[0], 3))
+            for p_idx, p in enumerate(y_pred):
+                score[p_idx, 0] = 1 - p[0]
+                if p[1] <= 0.5:
+                    score[p_idx, 1] = p[0]
+                else:
+                    score[p_idx, 1] = 1 - p[0]
+
+                score[p_idx, 2] = p[1]
+
+            pred = score / score.sum(1)[..., None]
+
+            metric_value = (compute_roc_auc(torch.tensor(pred[:, 0]),
+                                            torch.tensor(label_binarize(y_true, classes=list(range(n_class)))[:, 0])) +
+                            compute_roc_auc(torch.tensor(pred[:, n_class - 1]),
+                                            torch.tensor(
+                                                label_binarize(y_true, classes=list(range(n_class)))[:, n_class - 1]))) / 2
+        else:
+            if y_pred.shape[1] > 1:
+                metric_value = (compute_roc_auc(torch.tensor(y_pred[:, 0]),
+                                                torch.tensor(label_binarize(y_true, classes=list(range(n_class)))[:, 0])) +
+                                compute_roc_auc(torch.tensor(y_pred[:, n_class - 1]),
+                                                torch.tensor(label_binarize(y_true, classes=list(range(n_class)))[:,
+                                                             n_class - 1]))) / 2
+            else:
+                metric_value = compute_roc_auc(torch.tensor(y_pred), torch.tensor(y_true))
+
     else:
         metric_value = acc_metric
 

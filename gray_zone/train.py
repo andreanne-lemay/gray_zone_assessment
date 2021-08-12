@@ -95,7 +95,8 @@ def train(model: [torch.Tensor],
             acc_value = y_pred_value.flatten() == y.flatten()
             acc_metric = acc_value.sum() / len(acc_value)
 
-            metric_value = get_validation_metric(val_metric, y_pred_value, y, y_pred, avg_val_loss, acc_metric)
+            metric_value = get_validation_metric(val_metric, y_pred_value, y, y_pred, avg_val_loss, acc_metric,
+                                                 model_type, n_class)
             metric_values.append(metric_value)
 
             # If validation metric improves, save model

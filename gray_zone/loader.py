@@ -98,7 +98,7 @@ def get_balanced_sampler(split_df: pd.DataFrame,
     """ Balances the sampling of classes to have equal representation. """
     labels, count = np.unique(split_df[label_name], return_counts=True)
     weights = (1 / torch.Tensor(count)).float()
-    sample_weights = torch.tensor([weights[l] for l in split_df[label_name]]).float()
+    sample_weights = torch.tensor([weights[int(l)] for l in split_df[label_name]]).float()
     sampler = torch.utils.data.sampler.WeightedRandomSampler(sample_weights, len(sample_weights))
     return sampler, weights
 

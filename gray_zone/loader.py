@@ -26,7 +26,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self,
                     index: int):
-        img_path = os.path.join(self.data_path, self.df['image'].iloc[index])
+        img_path = os.path.join(self.data_path, self.df[self.image_name].iloc[index])
         if img_path.endswith('.npy'):
             img = np.load(img_path).astype('float32')
         else:

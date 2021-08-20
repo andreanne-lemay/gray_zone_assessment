@@ -4,7 +4,7 @@ import torch
 import monai
 from monai.transforms import Activations
 
-from gray_zone.models import dropout_resnet
+from gray_zone.models import dropout_resnet, resnest
 from gray_zone.models.coral import CoralLayer
 
 
@@ -22,17 +22,21 @@ def get_model(architecture: str,
                                                                                                architecture)
         model = resnet(pretrained=True)
         model.fc = torch.nn.Linear(model.fc.in_features, output_channels)
-        model = model.to(device)
-
+    elif 'resnest' in architecture:
+        resnet = getattr(resnest, architecture)
+        model = resnet(pretrained=True, final_drop=dropout_rate)
+        model.fc = torch.nn.Linear(model.fc.in_features, output_channels)
     elif 'densenet' in architecture:
         densenet = getattr(monai.networks.nets, architecture)
         model = densenet(spatial_dims=2,
                          in_channels=3,
                          out_channels=output_channels,
                          dropout_prob=float(dropout_rate),
-                         pretrained=True).to(device)
+                         pretrained=True)
     else:
         raise ValueError("Only ResNet or Densenet models are available.")
+
+    model = model.to(device)
 
     # Ordinal model requires a particular last layer to ensure coherent prediction (monotonic prediction)
     if model_type == 'ordinal':

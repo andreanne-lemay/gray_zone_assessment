@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import json
+import math
 import numpy as np
 import torch
 import matplotlib.image as mpimg
@@ -40,9 +41,10 @@ class Dataset(torch.utils.data.Dataset):
                 self.transforms = Compose([tr for tr in list(self.transforms.transforms)
                                            if 'CenterSpatialCrop' not in str(tr)])
 
+        gt = self.df[self.label_name].iloc[index]
         # Image, label, image filename
         return self.transforms(img), \
-               torch.as_tensor(int(self.df[self.label_name].iloc[index])), \
+               torch.as_tensor(int(gt)) if not math.isnan(gt) else gt, \
                self.df[self.image_name].iloc[index]
 
 

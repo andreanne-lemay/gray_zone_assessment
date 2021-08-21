@@ -98,7 +98,8 @@ def _run_model(output_path: str,
                         act=act,
                         transforms=val_transforms,
                         df=test_df,
-                        is_mc=param_dict['dropout_rate'] > 0)
+                        is_mc=param_dict['dropout_rate'] > 0,
+                        image_colname=image_colname)
 
 
 @click.command()

@@ -48,20 +48,21 @@ def _run_model(output_path: str,
     val_transforms = load_transforms(param_dict["val_transforms"])
 
     # Get train, val, test loaders and test dataframe
-    train_loader, val_loader, test_loader, test_df, weights = loader(data_path=data_path,
-                                                                     output_path=output_path,
-                                                                     train_transforms=train_transforms,
-                                                                     val_transforms=val_transforms,
-                                                                     metadata_path=csv_path,
-                                                                     label_colname=label_colname,
-                                                                     image_colname=image_colname,
-                                                                     split_colname=split_colname,
-                                                                     patient_colname=patient_colname,
-                                                                     train_frac=param_dict['train_frac'],
-                                                                     test_frac=param_dict['test_frac'],
-                                                                     seed=param_dict['seed'],
-                                                                     batch_size=param_dict['batch_size'],
-                                                                     balanced=param_dict['is_weighted_sampling'])
+    train_loader, val_loader, test_loader, val_df, test_df, weights = loader(data_path=data_path,
+                                                                             output_path=output_path,
+                                                                             train_transforms=train_transforms,
+                                                                             val_transforms=val_transforms,
+                                                                             metadata_path=csv_path,
+                                                                             label_colname=label_colname,
+                                                                             image_colname=image_colname,
+                                                                             split_colname=split_colname,
+                                                                             patient_colname=patient_colname,
+                                                                             train_frac=param_dict['train_frac'],
+                                                                             test_frac=param_dict['test_frac'],
+                                                                             seed=param_dict['seed'],
+                                                                             batch_size=param_dict['batch_size'],
+                                                                             balanced=param_dict[
+                                                                                 'is_weighted_sampling'])
 
     # Get model
     model, act = get_model(architecture=param_dict['architecture'],
@@ -91,15 +92,17 @@ def _run_model(output_path: str,
           model_type=param_dict['model_type'],
           val_metric=param_dict['val_metric'])
 
-    df = evaluate_model(model=model,
-                        loader=test_loader,
-                        output_path=output_path,
-                        device=param_dict['device'],
-                        act=act,
-                        transforms=val_transforms,
-                        df=test_df,
-                        is_mc=param_dict['dropout_rate'] > 0,
-                        image_colname=image_colname)
+    for data_loader, data_df, suffix in zip([test_loader, val_loader], [test_df, val_df], ['', '_validation']):
+        df = evaluate_model(model=model,
+                            loader=data_loader,
+                            output_path=output_path,
+                            device=param_dict['device'],
+                            act=act,
+                            transforms=val_transforms,
+                            df=data_df,
+                            is_mc=param_dict['dropout_rate'] > 0,
+                            image_colname=image_colname,
+                            suffix=suffix)
 
 
 @click.command()

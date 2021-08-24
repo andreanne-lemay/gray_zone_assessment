@@ -15,7 +15,8 @@ def evaluate_model(model: torch.nn.Module,
                    transforms: Compose = None,
                    df: pd.DataFrame = None,
                    is_mc: bool = True,
-                   image_colname: str = 'image') -> pd.DataFrame:
+                   image_colname: str = 'image',
+                   suffix: str = None) -> pd.DataFrame:
     """ Evaluate model on test set. """
     best_model_path = os.path.join(output_path, "best_metric_model.pth")
 
@@ -62,7 +63,7 @@ def evaluate_model(model: torch.nn.Module,
     df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
     # Save results in csv file
-    predictions_path = os.path.join(output_path, "predictions.csv")
+    predictions_path = os.path.join(output_path, "predictions" + suffix + ".csv")
     df.to_csv(predictions_path)
 
     return df

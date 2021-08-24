@@ -66,7 +66,8 @@ def loader(data_path: str,
     Inspired by https://github.com/Project-MONAI/tutorials/blob/master/2d_classification/mednist_tutorial.ipynb
 
     Returns:
-        DataLoader, DataLoader, DataLoader, pd.Dataframe: train dataset, validation dataset, test dataset, test df
+        DataLoader, DataLoader, DataLoader, pd.Dataframe: train dataset, validation dataset, val dataset, test dataset,
+         test df
     """
     # Load metadata and create val/train/test split if not already done
     split_df = split_dataset(output_path, train_frac=train_frac, test_frac=test_frac,
@@ -92,7 +93,7 @@ def loader(data_path: str,
     if len(df_test):
         test_ds = Dataset(df_test, data_path, val_transforms, label_colname, image_colname)
         test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size, num_workers=10)
-    return train_loader, val_loader, test_loader, df_test, weights
+    return train_loader, val_loader, test_loader, df_val, df_test, weights
 
 
 def get_balanced_sampler(split_df: pd.DataFrame,

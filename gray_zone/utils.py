@@ -15,8 +15,9 @@ from monai.transforms import (
     RandShiftIntensity,
     RandStdShiftIntensity,
     RandScaleIntensity,
+    RandGaussianNoise
 )
-from torchvision.transforms import Normalize, Lambda
+
 import torch
 import numpy as np
 from monai.metrics import compute_roc_auc

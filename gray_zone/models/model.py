@@ -4,7 +4,7 @@ import torch
 import monai
 from monai.transforms import Activations
 
-from gray_zone.models import dropout_resnet, resnest
+from gray_zone.models import dropout_resnet, resnest, vit
 from gray_zone.models.coral import CoralLayer
 
 
@@ -33,6 +33,8 @@ def get_model(architecture: str,
                          out_channels=output_channels,
                          dropout_prob=float(dropout_rate),
                          pretrained=True)
+    elif 'vit' in architecture:
+        model = vit.vit_b16(num_classes=output_channels, image_size=256, dropout_rate=dropout_rate)
     else:
         raise ValueError("Only ResNet or Densenet models are available.")
 

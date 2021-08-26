@@ -10,3 +10,4 @@ plotly
 GitPython==3.1.7
 click
 fvcore
+einops

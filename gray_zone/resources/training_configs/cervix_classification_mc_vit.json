@@ -15,29 +15,18 @@
     "test_frac": 0.25,
     "train_transforms": {
         "Transpose": {"indices": [2, 0, 1]},
+        "CenterSpatialCrop": {"roi_size":  [1024, 1024]},
+        "Resize": {"spatial_size": [256, 256]},
         "ScaleIntensity": {},
-        "RandShiftIntensity": {
-            "offsets": 0.2,
-            "prob": 1.0
-        },
-        "RandScaleIntensity": {
-            "factors": 0.2,
-            "prob": 1.0
-        },
-        "RandStdShiftIntensity": {
-            "factors": 0.2,
-            "prob": 1.0
-        },
         "RandRotate": {"range_x": 0.26, "prob": 0.5, "keep_size": true},
         "RandFlip": {"spatial_axis": 0, "prob": 0.5},
-        "RandGaussianNoise": {"prob": 1.0, "std": 0.5},
-        "Resize": {"spatial_size": [256, 256]},
         "ToTensor": {}
     },
     "val_transforms": {
         "Transpose": {"indices": [2, 0, 1]},
-        "ScaleIntensity": {},
+        "CenterSpatialCrop": {"roi_size":  [1024, 1024]},
         "Resize": {"spatial_size": [256, 256]},
+        "ScaleIntensity": {},
         "ToTensor": {}
     }
 }

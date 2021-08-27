@@ -1,5 +1,5 @@
 {
-    "architecture": "densenet121",
+    "architecture": "resnest50",
     "model_type": "ordinal",
     "loss": "coral",
     "batch_size": 8,

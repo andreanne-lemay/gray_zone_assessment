@@ -1,7 +1,7 @@
 {
     "architecture": "densenet121",
     "model_type": "classification",
-    "loss": "qwk",
+    "loss": "ce",
     "batch_size": 8,
     "lr": 1e-5,
     "n_epochs": 75,

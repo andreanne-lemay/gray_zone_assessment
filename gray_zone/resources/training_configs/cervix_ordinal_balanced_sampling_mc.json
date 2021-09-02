@@ -1,7 +1,7 @@
 {
     "architecture": "densenet121",
-    "model_type": "classification",
-    "loss": "ce",
+    "model_type": "ordinal",
+    "loss": "coral",
     "batch_size": 8,
     "lr": 1e-5,
     "n_epochs": 75,
@@ -9,7 +9,7 @@
     "val_metric": "custom_cervix",
     "dropout_rate": 0.1,
     "is_weighted_loss": false,
-    "is_weighted_sampling": false,
+    "is_weighted_sampling": true,
     "seed": 0,
     "train_frac": 0.65,
     "test_frac": 0.25,

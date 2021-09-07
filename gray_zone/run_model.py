@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import torch
 
-from gray_zone.loader import loader
+from gray_zone.loader import loader, get_unbalanced_loader
 from gray_zone.utils import load_transforms
 from gray_zone.models.model import get_model
 from gray_zone.train import train
@@ -92,6 +92,8 @@ def _run_model(output_path: str,
           model_type=param_dict['model_type'],
           val_metric=param_dict['val_metric'])
 
+    val_loader = get_unbalanced_loader(df, data_path, param_dict['batch_size'], val_transforms,
+                                       label_colname, image_colname)
     for data_loader, data_df, suffix in zip([test_loader, val_loader], [test_df, val_df], ['', '_validation']):
         df = evaluate_model(model=model,
                             loader=data_loader,

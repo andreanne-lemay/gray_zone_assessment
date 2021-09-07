@@ -92,7 +92,7 @@ def _run_model(output_path: str,
           model_type=param_dict['model_type'],
           val_metric=param_dict['val_metric'])
 
-    val_loader = get_unbalanced_loader(df, data_path, param_dict['batch_size'], val_transforms,
+    val_loader = get_unbalanced_loader(val_df, data_path, param_dict['batch_size'], val_transforms,
                                        label_colname, image_colname)
     for data_loader, data_df, suffix in zip([test_loader, val_loader], [test_df, val_df], ['', '_validation']):
         df = evaluate_model(model=model,

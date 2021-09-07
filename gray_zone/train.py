@@ -1,6 +1,7 @@
 import os
 import monai.transforms
 import torch
+from torch.autograd import Variable
 import monai
 from monai.transforms import Activations
 from tqdm import tqdm
@@ -26,7 +27,8 @@ def train(model: [torch.Tensor],
           scheduler: any,
           n_class: int,
           model_type: str = 'classification',
-          val_metric: str = None):
+          val_metric: str = None,
+          adv_noise: torch.Tensor = None):
     """ Training loop. """
     best_metric = -np.inf
     best_metric_epoch = -1
@@ -43,17 +45,38 @@ def train(model: [torch.Tensor],
             step += 1
 
             inputs, labels = batch_data[0].to(device), batch_data[1].to(device)
+            # If adversarial training, apply noise to input
+            if adv_noise is not None:
+                # FreeTrain batch repeats
+                n_repeat = 4
+                for n in range(n_repeat):
+                    noise_batch = Variable(adv_noise[0:inputs.size(0)], requires_grad=True).to(device)
+                    inputs += noise_batch
+                    inputs.clamp_(0, 1.0)
+                    optimizer.zero_grad()
+                    outputs = model(inputs)
+                    outputs, labels = modify_label_outputs_for_model_type(model_type, outputs, labels, act, n_class)
 
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            outputs, labels = modify_label_outputs_for_model_type(model_type, outputs, labels, act, n_class)
-
-            loss = loss_function(outputs, labels)
-            loss.backward()
-            optimizer.step()
+                    loss = loss_function(outputs, labels)
+                    loss.backward()
+                    # Update perturbation
+                    # fgsm: Fast Gradient Sign Method
+                    # Values taken from https://github.com/adpatil2/SNAP
+                    clip_eps = 0.0016
+                    fgsm_step = 0.0016
+                    pert = fgsm_step * torch.sign(noise_batch.grad)
+                    adv_noise[0:inputs.size(0)] += pert.data
+                    adv_noise.clamp_(-clip_eps, clip_eps)
+                    optimizer.step()
+            else:
+                optimizer.zero_grad()
+                outputs = model(inputs)
+                outputs, labels = modify_label_outputs_for_model_type(model_type, outputs, labels, act, n_class)
+                loss = loss_function(outputs, labels)
+                loss.backward()
+                optimizer.step()
 
             epoch_loss += loss.item()
-
         epoch_loss /= step
         epoch_loss_values.append(epoch_loss)
         print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")

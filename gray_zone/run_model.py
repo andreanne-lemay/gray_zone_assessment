@@ -22,7 +22,8 @@ def _run_model(output_path: str,
                image_colname: str,
                split_colname: str,
                patient_colname: str,
-               transfer_learning: str) -> None:
+               transfer_learning: str,
+               adverserial: bool = False) -> None:
     """ Run deep learning model for training and evaluation for classification tasks. """
     # Create output directory if it doesn't exist
     if not os.path.isdir(output_path):
@@ -65,18 +66,22 @@ def _run_model(output_path: str,
                                                                                  'is_weighted_sampling'])
 
     # Get model
+    img_dim = list(train_loader.dataset.__getitem__(0)[0].size())
     model, act = get_model(architecture=param_dict['architecture'],
                            model_type=param_dict['model_type'],
                            dropout_rate=param_dict['dropout_rate'],
                            n_class=param_dict['n_class'],
                            device=param_dict['device'],
                            transfer_learning=transfer_learning,
-                           output_dir=output_path)
+                           img_dim=img_dim)
 
     optimizer = torch.optim.Adam(model.parameters(), param_dict['lr'])
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=True)
     loss_function = get_loss(param_dict['loss'], param_dict['n_class'], param_dict['is_weighted_loss'],
                              weights, param_dict['device'])
+
+    global_noise_data = torch.zeros([param_dict['batch_size']] + img_dim).to(
+        param_dict['device']) if adverserial else None
 
     train(model=model,
           act=act,
@@ -90,7 +95,9 @@ def _run_model(output_path: str,
           scheduler=scheduler,
           n_class=param_dict['n_class'],
           model_type=param_dict['model_type'],
-          val_metric=param_dict['val_metric'])
+          val_metric=param_dict['val_metric'],
+          adv_noise=global_noise_data)
+
 
     for data_loader, data_df, suffix in zip([test_loader, val_loader], [test_df, val_df], ['', '_validation']):
         df = evaluate_model(model=model,
@@ -119,6 +126,7 @@ def _run_model(output_path: str,
               help='Column name in csv associated to the patient id.')
 @click.option('--transfer-learning', '-tf', default=None, help="Path to model (.pth) for fine-tune training (i.e., "
                                                                "start training with weights from other model.)")
+@click.option('--adversarial', '-a', default=False, is_flag=True, help='Enable adversarial training.')
 def run_model(output_path: str,
               param_path: str,
               data_path: str,
@@ -127,10 +135,11 @@ def run_model(output_path: str,
               image_colname: str,
               split_colname: str,
               patient_colname: str,
-              transfer_learning: str) -> None:
+              transfer_learning: str,
+              adversarial: bool) -> None:
     """Train deep learning model using CLI. """
     _run_model(output_path, param_path, data_path, csv_path, label_colname, image_colname, split_colname,
-               patient_colname, transfer_learning)
+               patient_colname, transfer_learning, adversarial)
 
 
 if __name__ == "__main__":

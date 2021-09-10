@@ -65,13 +65,14 @@ def _run_model(output_path: str,
                                                                                  'is_weighted_sampling'])
 
     # Get model
+    img_dim = list(train_loader.dataset.__getitem__(0)[0].size())
     model, act = get_model(architecture=param_dict['architecture'],
                            model_type=param_dict['model_type'],
                            dropout_rate=param_dict['dropout_rate'],
                            n_class=param_dict['n_class'],
                            device=param_dict['device'],
                            transfer_learning=transfer_learning,
-                           output_dir=output_path)
+                           img_dim=img_dim)
 
     optimizer = torch.optim.Adam(model.parameters(), param_dict['lr'])
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=True)

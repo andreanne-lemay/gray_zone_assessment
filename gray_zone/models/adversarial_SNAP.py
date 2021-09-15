@@ -58,7 +58,8 @@ def get_snap_net(model, device, img_size):
 
     # Choice from paper
     total_noi_pw = 4500
-    dimwise_noi_var_all_np = (total_noi_pw / np.multiply(img_size)) * np.ones(img_size)
+    img_size = np.array(img_size).transpose()
+    dimwise_noi_var_all_np = (total_noi_pw / np.prod(img_size)) * np.ones(img_size.transpose())
     dimwise_noi_var_all = torch.from_numpy(dimwise_noi_var_all_np).float().to(device)
     dimwise_noi_std_pt = torch.sqrt(dimwise_noi_var_all)
 
@@ -67,7 +68,7 @@ def get_snap_net(model, device, img_size):
     normalize_layer = NormalizeLayer([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     InstNoiseLayer = NoiseLayer(dimwise_noi_std_pt, unit_std_scale, m_dist)
 
-    return torch.nn.Sequential(InstNoiseLayer, normalize_layer, model)
+    return torch.nn.Sequential(InstNoiseLayer, normalize_layer, model), [total_noi_pw_pt, dimwise_noi_std_pt]
 
 
 def _record_eta_batchwise(model, X, y, args):
@@ -75,7 +76,7 @@ def _record_eta_batchwise(model, X, y, args):
     num_steps = args.num_steps_attack
     step_size = epsilon * 0.8
 
-    X_pgd = Variable(X.data, requires_grad=True)
+    X_pgd = torch.autograd.Variable(X.data, requires_grad=True)
     model.eval()
     if args.random_start:
         with torch.no_grad():

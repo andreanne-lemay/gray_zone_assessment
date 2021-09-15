@@ -6,6 +6,7 @@ from monai.transforms import Activations
 
 from gray_zone.models import dropout_resnet, resnest, vit
 from gray_zone.models.coral import CoralLayer
+from gray_zone.models.adversarial_SNAP import get_snap_net
 
 
 def get_model(architecture: str,
@@ -14,7 +15,8 @@ def get_model(architecture: str,
               n_class: int,
               device: str,
               transfer_learning: str,
-              img_dim: list or tuple):
+              img_dim: list or tuple,
+              adverserial: bool):
     """ Init model """
     output_channels, act = get_model_type_params(model_type, n_class)
     if 'resnet' in architecture:
@@ -38,6 +40,10 @@ def get_model(architecture: str,
     else:
         raise ValueError("Only ResNet or Densenet models are available.")
 
+    total_noi_pw_pt = None
+    if adverserial:
+        model, total_noi_pw_pt = get_snap_net(model, device, img_dim)
+
     model = model.to(device)
 
     # Ordinal model requires a particular last layer to ensure coherent prediction (monotonic prediction)
@@ -56,7 +62,7 @@ def get_model(architecture: str,
         model.state_dict().update(pretrained_dict)
         model.load_state_dict(model.state_dict())
 
-    return model, act
+    return model, act, total_noi_pw_pt
 
 
 def get_model_type_params(model_type: str,

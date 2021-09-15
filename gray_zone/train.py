@@ -149,14 +149,14 @@ def train(model: [torch.Tensor],
             DimWise_noi_var_all = normzed_eta_rt_mean_sq_proj * total_noi_pw_pt
             dimwise_noi_std_pt = torch.sqrt(DimWise_noi_var_all)
 
-            model.state_dict()['0.DimWise_noi_std_pt'].copy_(dimwise_noi_std_pt)
+            model.state_dict()['0.dimwise_noi_std_pt'].copy_(dimwise_noi_std_pt)
 
             print("updated noise std:")
-            print(model.state_dict()['0.DimWise_noi_std_pt'])
+            print(model.state_dict()['0.dimwise_noi_std_pt'])
 
             print("total pgd noise power (times no_of_batches)")
             print(torch.sum(stored_eta_mean_sq_proj))
-            print("shape of DimWise_noi_std is:")
+            print("shape of dimwise_noi_std_pt is:")
             print(dimwise_noi_std_pt.size())
 
 

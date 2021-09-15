@@ -95,10 +95,10 @@ def _record_eta_batchwise(model, X, y, args):
             random_noise_final = random_noise_reshaped_normzed.view(X_pgd.size(0), X_pgd.size(1), X_pgd.size(2),
                                                                     X_pgd.size(3))
 
-        X_pgd = Variable(X_pgd.data + random_noise_final.data, requires_grad=True)
+        X_pgd = torch.autograd.Variable(X_pgd.data + random_noise_final.data, requires_grad=True)
 
     for _ in range(num_steps):
-        opt = optim.SGD([X_pgd], lr=1e-3)
+        opt = torch.optim.SGD([X_pgd], lr=1e-3)
         opt.zero_grad()
 
         with torch.enable_grad():
@@ -132,7 +132,7 @@ def _record_eta_batchwise(model, X, y, args):
             eta_tot_final = eta_tot_reshaped_normzed.view(X_pgd_grad.size(0), X_pgd_grad.size(1), X_pgd_grad.size(2),
                                                           X_pgd_grad.size(3))
 
-        X_pgd = Variable(torch.clamp(X.data + eta_tot_final.data, 0, 1.0), requires_grad=True)
+        X_pgd = torch.autograd.Variable(torch.clamp(X.data + eta_tot_final.data, 0, 1.0), requires_grad=True)
         # X_pgd = Variable(torch.clamp(X_pgd, 0, 1.0), requires_grad=True)
 
     with torch.no_grad():
@@ -154,7 +154,7 @@ def eval_adv_train_whitebox(model, epoch_no, train_loader, args):
 
         data, target = data.cuda(), target.cuda()
         # pgd attack
-        X, y = Variable(data, requires_grad=True), Variable(target)
+        X, y = torch.autograd.Variable(data, requires_grad=True), torch.autograd.Variable(target)
         eta_final_batch = _record_eta_batchwise(model, X, y, args)
         print(batch_count)
 

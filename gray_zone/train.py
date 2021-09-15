@@ -166,7 +166,8 @@ def eval_adv_train_whitebox(model, epoch_no, train_loader):
     nat_err_train_tot = 0
     batch_count = 0
 
-    for data, target in train_loader:
+    for batch_data in train_loader:
+        data, target = batch_data[0], batch_data[1]
         batch_size = len(data)
 
         data, target = data.cuda(), target.cuda()

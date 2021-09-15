@@ -17,6 +17,7 @@ from gray_zone.records import get_job_record, save_job_record
 def _run_model(output_path: str,
                param_path: str,
                data_path: str,
+               fake_data_path: str,
                csv_path: str,
                label_colname: str,
                image_colname: str,
@@ -51,6 +52,7 @@ def _run_model(output_path: str,
 
     # Get train, val, test loaders and test dataframe
     train_loader, val_loader, test_loader, val_df, test_df, weights = loader(data_path=data_path,
+                                                                             fake_data_path=fake_data_path,
                                                                              output_path=output_path,
                                                                              train_transforms=train_transforms,
                                                                              val_transforms=val_transforms,
@@ -95,7 +97,7 @@ def _run_model(output_path: str,
               model_type=param_dict['model_type'],
               val_metric=param_dict['val_metric'])
 
-    val_loader = get_unbalanced_loader(val_df, data_path, param_dict['batch_size'], val_transforms,
+    val_loader = get_unbalanced_loader(val_df, data_path, fake_data_path, param_dict['batch_size'], val_transforms,
                                        label_colname, image_colname)
     for data_loader, data_df, suffix in zip([test_loader, val_loader], [test_df, val_df], ['', '_validation']):
         df = evaluate_model(model=model,
@@ -114,6 +116,7 @@ def _run_model(output_path: str,
 @click.option('--output-path', '-o', required=True, help='Output path.')
 @click.option('--param-path', '-p', required=True, help='Path to parameter file (.json).')
 @click.option('--data-path', '-d', required=True, help='Path to data (directory where images are saved).')
+@click.option('--fake-data-path', '-f', required=True, help='Path to fake data (directory where images are saved).')
 @click.option('--csv-path', '-c', required=True, help='Path to csv file containing image name and labels.')
 @click.option('--label-colname', '-lc', default='label', help='Column name in csv associated to the labels.')
 @click.option('--image-colname', '-ic', default='image', help='Column name in csv associated to the image.')
@@ -128,6 +131,7 @@ def _run_model(output_path: str,
 def run_model(output_path: str,
               param_path: str,
               data_path: str,
+              fake_data_path: str,
               csv_path: str,
               label_colname: str,
               image_colname: str,
@@ -136,8 +140,8 @@ def run_model(output_path: str,
               transfer_learning: str,
               test: bool) -> None:
     """Train deep learning model using CLI. """
-    _run_model(output_path, param_path, data_path, csv_path, label_colname, image_colname, split_colname,
-               patient_colname, transfer_learning, test)
+    _run_model(output_path, param_path, data_path, fake_data_path, csv_path, label_colname, image_colname,
+               split_colname, patient_colname, transfer_learning, test)
 
 
 if __name__ == "__main__":

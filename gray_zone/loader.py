@@ -48,7 +48,69 @@ class Dataset(torch.utils.data.Dataset):
                self.df[self.image_name].iloc[index]
 
 
+class DualDomainDataset(torch.utils.data.Dataset):
+    def __init__(self,
+                 df: pd.DataFrame,
+                 data_path: str,
+                 fake_data_path: str,
+                 transforms: Compose,
+                 label_colname: str = 'label',
+                 image_colname: str = 'image'):
+        self.df = df
+        self.data_path = data_path
+        self.fake_data_path = fake_data_path
+        self.transforms = transforms
+        self.label_name = label_colname
+        self.image_name = image_colname
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self,
+                    index: int):
+        img_path = os.path.join(self.data_path, self.df[self.image_name].iloc[index])
+        fake_img_path = os.path.join(self.fake_data_path, self.df[self.image_name].iloc[index])
+        idx_data = self.df.iloc[index]
+
+        if img_path.endswith('.npy'):
+            img = np.load(img_path).astype('float32')
+            fake_img = np.load(fake_img_path).astype('float32')
+        else:
+            img = mpimg.imread(img_path).astype('float32')
+            fake_img = mpimg.imread(fake_img_path.replace(".jpg", ".png")).astype('float32')
+            idx_data = self.df.iloc[index]
+
+            # Use provided bounding box if available. The bounding box coordinates should be stored in columns named
+            # y1, y2, x1, x2.
+            if 'y1' in self.df:
+                img = img[int(idx_data['y1']): int(idx_data['y2']), int(idx_data['x1']): int(idx_data['x2']), :]
+                # Remove center crop if the bounding box is provided
+                self.transforms = Compose([tr for tr in list(self.transforms.transforms)
+                                           if 'CenterSpatialCrop' not in str(tr)])
+
+        gt = self.df[self.label_name].iloc[index]
+        real_img = self.transforms(img)
+
+        self.transforms_fake = Compose([tr for tr in list(self.transforms.transforms)
+                                        if (('CenterSpatialCrop' not in str(tr)) and ('Resize' not in str(tr)))])
+        fake_img = self.transforms_fake(fake_img)
+
+        domain_order = sorted(self.df.study.unique())
+        real_img_study = idx_data['study']
+        real_pos = domain_order.index(real_img_study)
+        if real_pos == 0:
+            img = torch.cat([real_img, fake_img], dim=0)
+        else:
+            img = torch.cat([fake_img, real_img], dim=0)
+
+        # Image, label, image filename
+        return img, \
+               torch.as_tensor(int(gt)) if not math.isnan(gt) else gt, \
+               self.df[self.image_name].iloc[index]
+
+
 def loader(data_path: str,
+           fake_data_path: str,
            output_path: str,
            train_transforms: Compose,
            val_transforms: Compose,
@@ -73,31 +135,32 @@ def loader(data_path: str,
     split_df = split_dataset(output_path, train_frac=train_frac, test_frac=test_frac,
                              seed=seed, metadata_path=metadata_path, split_colname=split_colname,
                              patient_colname=patient_colname)
+
     train_loader, val_loader, test_loader, weights = None, None, None, None
     df_train = split_df[split_df[split_colname] == "train"]
     if len(df_train):
         sampler, weights = get_balanced_sampler(df_train, label_colname)
         shuffle = not balanced
-        train_ds = Dataset(df_train, data_path, train_transforms, label_colname, image_colname)
+        train_ds = DualDomainDataset(df_train, data_path, fake_data_path, train_transforms, label_colname, image_colname)
         train_loader = torch.utils.data.DataLoader(
             train_ds, batch_size=batch_size, shuffle=shuffle, num_workers=10, sampler=sampler if balanced else None)
 
     df_val = split_df[split_df[split_colname] == "val"]
     if len(df_val):
         sampler, _ = get_balanced_sampler(df_val, label_colname)
-        val_ds = Dataset(df_val, data_path, val_transforms, label_colname, image_colname)
+        val_ds = DualDomainDataset(df_val, data_path, fake_data_path, val_transforms, label_colname, image_colname)
         val_loader = torch.utils.data.DataLoader(
             val_ds, batch_size=batch_size, num_workers=10, sampler=sampler if balanced else None)
 
     df_test = split_df[split_df[split_colname] == "test"]
     if len(df_test):
-        test_ds = Dataset(df_test, data_path, val_transforms, label_colname, image_colname)
+        test_ds = DualDomainDataset(df_test, data_path, fake_data_path, val_transforms, label_colname, image_colname)
         test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size, num_workers=10)
     return train_loader, val_loader, test_loader, df_val, df_test, weights
 
 
-def get_unbalanced_loader(df, data_path, batch_size, transforms, label_colname, image_colname):
-    ds = Dataset(df, data_path, transforms, label_colname, image_colname)
+def get_unbalanced_loader(df, data_path, fake_data_path, batch_size, transforms, label_colname, image_colname):
+    ds = DualDomainDataset(df, data_path, fake_data_path, transforms, label_colname, image_colname)
     return torch.utils.data.DataLoader(ds, batch_size=batch_size, num_workers=10, sampler=None)
 
 

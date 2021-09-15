@@ -29,7 +29,7 @@ def get_model(architecture: str,
     elif 'densenet' in architecture:
         densenet = getattr(monai.networks.nets, architecture)
         model = densenet(spatial_dims=2,
-                         in_channels=3,
+                         in_channels=6,
                          out_channels=output_channels,
                          dropout_prob=float(dropout_rate),
                          pretrained=True)

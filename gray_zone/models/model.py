@@ -14,7 +14,7 @@ def get_model(architecture: str,
               n_class: int,
               device: str,
               transfer_learning: str,
-              output_dir: str):
+              img_dim: list or tuple):
     """ Init model """
     output_channels, act = get_model_type_params(model_type, n_class)
     if 'resnet' in architecture:
@@ -34,7 +34,7 @@ def get_model(architecture: str,
                          dropout_prob=float(dropout_rate),
                          pretrained=True)
     elif 'vit' in architecture:
-        model = vit.vit_b16(num_classes=output_channels, image_size=256, dropout_rate=dropout_rate)
+        model = vit.vit_b16(num_classes=output_channels, image_size=img_dim[1], dropout_rate=dropout_rate)
     else:
         raise ValueError("Only ResNet or Densenet models are available.")
 

@@ -1,7 +1,7 @@
 {
     "architecture": "vit",
     "model_type": "classification",
-    "loss": "ce",
+    "loss": "qwk",
     "batch_size": 8,
     "lr": 1e-5,
     "n_epochs": 75,
@@ -16,7 +16,7 @@
     "train_transforms": {
         "Transpose": {"indices": [2, 0, 1]},
         "CenterSpatialCrop": {"roi_size":  [1024, 1024]},
-        "Resize": {"spatial_size": [384, 384]},
+        "Resize": {"spatial_size": [224, 224]},
         "ScaleIntensity": {},
         "RandRotate": {"range_x": 0.26, "prob": 0.5, "keep_size": true},
         "RandFlip": {"spatial_axis": 0, "prob": 0.5},
@@ -25,7 +25,7 @@
     "val_transforms": {
         "Transpose": {"indices": [2, 0, 1]},
         "CenterSpatialCrop": {"roi_size":  [1024, 1024]},
-        "Resize": {"spatial_size": [384, 384]},
+        "Resize": {"spatial_size": [224, 224]},
         "ScaleIntensity": {},
         "ToTensor": {}
     }

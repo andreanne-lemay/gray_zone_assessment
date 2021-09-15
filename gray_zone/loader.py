@@ -96,6 +96,11 @@ def loader(data_path: str,
     return train_loader, val_loader, test_loader, df_val, df_test, weights
 
 
+def get_unbalanced_loader(df, data_path, batch_size, transforms, label_colname, image_colname):
+    ds = Dataset(df, data_path, transforms, label_colname, image_colname)
+    return torch.utils.data.DataLoader(ds, batch_size=batch_size, num_workers=10, sampler=None)
+
+
 def get_balanced_sampler(split_df: pd.DataFrame,
                          label_name: str):
     """ Balances the sampling of classes to have equal representation. """

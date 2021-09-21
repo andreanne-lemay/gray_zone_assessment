@@ -58,16 +58,16 @@ class SplAtConv2d(Module):
         if self.use_bn:
             self.bn1 = norm_layer(inter_channels)
         self.fc2 = Conv2d(inter_channels, channels*radix, 1, groups=self.cardinality)
-        if dropblock_prob > 0.0:
-            self.dropblock = DropBlock2D(dropblock_prob, 3)
+        # if dropblock_prob > 0.0:
+        #     self.dropblock = DropBlock2D(dropblock_prob, 3)
         self.rsoftmax = rSoftMax(radix, groups)
 
     def forward(self, x):
         x = self.conv(x)
         if self.use_bn:
             x = self.bn0(x)
-        if self.dropblock_prob > 0.0:
-            x = self.dropblock(x)
+        # if self.dropblock_prob > 0.0:
+        #     x = self.dropblock(x)
         x = self.relu(x)
 
         batch, rchannel = x.shape[:2]
@@ -159,16 +159,16 @@ class Bottleneck(nn.Module):
         self.radix = radix
         self.avd = avd and (stride > 1 or is_first)
         self.avd_first = avd_first
-
+        self.dropout = torch.nn.Dropout(p=dropblock_prob)
         if self.avd:
             self.avd_layer = nn.AvgPool2d(3, stride, padding=1)
             stride = 1
 
-        if dropblock_prob > 0.0:
-            self.dropblock1 = DropBlock2D(dropblock_prob, 3)
-            if radix == 1:
-                self.dropblock2 = DropBlock2D(dropblock_prob, 3)
-            self.dropblock3 = DropBlock2D(dropblock_prob, 3)
+        # if dropblock_prob > 0.0:
+        #     self.dropblock1 = DropBlock2D(dropblock_prob, 3)
+        #     if radix == 1:
+        #         self.dropblock2 = DropBlock2D(dropblock_prob, 3)
+        #     self.dropblock3 = DropBlock2D(dropblock_prob, 3)
 
         if radix >= 1:
             self.conv2 = SplAtConv2d(
@@ -211,8 +211,8 @@ class Bottleneck(nn.Module):
 
         out = self.conv1(x)
         out = self.bn1(out)
-        if self.dropblock_prob > 0.0:
-            out = self.dropblock1(out)
+        # if self.dropblock_prob > 0.0:
+        #     out = self.dropblock1(out)
         out = self.relu(out)
 
         if self.avd and self.avd_first:
@@ -221,8 +221,8 @@ class Bottleneck(nn.Module):
         out = self.conv2(out)
         if self.radix == 0:
             out = self.bn2(out)
-            if self.dropblock_prob > 0.0:
-                out = self.dropblock2(out)
+            # if self.dropblock_prob > 0.0:
+            #     out = self.dropblock2(out)
             out = self.relu(out)
 
         if self.avd and not self.avd_first:
@@ -230,14 +230,15 @@ class Bottleneck(nn.Module):
 
         out = self.conv3(out)
         out = self.bn3(out)
-        if self.dropblock_prob > 0.0:
-            out = self.dropblock3(out)
+        # if self.dropblock_prob > 0.0:
+        #     out = self.dropblock3(out)
 
         if self.downsample is not None:
             residual = self.downsample(x)
 
         out += residual
         out = self.relu(out)
+        out = self.dropout(out)
 
         return out
 
@@ -409,8 +410,8 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        if self.drop:
-            x = self.drop(x)
+        # if self.drop:
+        #     x = self.drop(x)
         x = self.fc(x)
 
         return x

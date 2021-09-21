@@ -58,6 +58,7 @@ def loader(data_path: str,
            seed: int = 0,
            batch_size: int = 32,
            balanced: bool = False,
+           weights: torch.Tensor = None,
            label_colname: str = 'label',
            image_colname: str = 'image',
            split_colname: str = 'dataset',
@@ -73,10 +74,10 @@ def loader(data_path: str,
     split_df = split_dataset(output_path, train_frac=train_frac, test_frac=test_frac,
                              seed=seed, metadata_path=metadata_path, split_colname=split_colname,
                              patient_colname=patient_colname)
-    train_loader, val_loader, test_loader, weights = None, None, None, None
+    train_loader, val_loader, test_loader = None, None, None
     df_train = split_df[split_df[split_colname] == "train"]
     if len(df_train):
-        sampler, weights = get_balanced_sampler(df_train, label_colname)
+        sampler, weights = get_balanced_sampler(df_train, label_colname, weights)
         shuffle = not balanced
         train_ds = Dataset(df_train, data_path, train_transforms, label_colname, image_colname)
         train_loader = torch.utils.data.DataLoader(
@@ -84,7 +85,7 @@ def loader(data_path: str,
 
     df_val = split_df[split_df[split_colname] == "val"]
     if len(df_val):
-        sampler, _ = get_balanced_sampler(df_val, label_colname)
+        sampler, _ = get_balanced_sampler(df_val, label_colname, weights)
         val_ds = Dataset(df_val, data_path, val_transforms, label_colname, image_colname)
         val_loader = torch.utils.data.DataLoader(
             val_ds, batch_size=batch_size, num_workers=10, sampler=sampler if balanced else None)
@@ -102,10 +103,15 @@ def get_unbalanced_loader(df, data_path, batch_size, transforms, label_colname, 
 
 
 def get_balanced_sampler(split_df: pd.DataFrame,
-                         label_name: str):
+                         label_name: str,
+                         weights: None):
     """ Balances the sampling of classes to have equal representation. """
     labels, count = np.unique(split_df[label_name], return_counts=True)
-    weights = (1 / torch.Tensor(count)).float()
+    weight_count = (1 / torch.Tensor(count)).float()
+    if weights is None:
+        weights = weight_count
+    else:
+        weights *= weight_count
     sample_weights = torch.tensor([weights[int(l)] for l in split_df[label_name]]).float()
     sampler = torch.utils.data.sampler.WeightedRandomSampler(sample_weights, len(sample_weights))
     return sampler, weights

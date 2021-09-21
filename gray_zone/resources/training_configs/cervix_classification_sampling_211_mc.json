@@ -1,7 +1,7 @@
 {
     "architecture": "densenet121",
     "model_type": "classification",
-    "loss": "qwk",
+    "loss": "ce",
     "batch_size": 8,
     "lr": 1e-5,
     "n_epochs": 75,
@@ -10,6 +10,7 @@
     "dropout_rate": 0.1,
     "is_weighted_loss": false,
     "is_weighted_sampling": true,
+    "weights": [2, 1, 1],
     "seed": 0,
     "train_frac": 0.10,
     "test_frac": 0.89,

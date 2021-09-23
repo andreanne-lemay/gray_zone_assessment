@@ -1,4 +1,5 @@
 from monai.transforms import (
+    RepeatChannel,
     Activations,
     AsDiscrete,
     Compose,

@@ -307,31 +307,32 @@ class ResNet(nn.Module):
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0], norm_layer=norm_layer, is_first=False)
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, norm_layer=norm_layer)
+        self.layer1 = self._make_layer(block, 64, layers[0], norm_layer=norm_layer, is_first=False,
+                                       dropblock_prob=final_drop)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, norm_layer=norm_layer,
+                                       dropblock_prob=final_drop)
         if dilated or dilation == 4:
             self.layer3 = self._make_layer(block, 256, layers[2], stride=1,
                                            dilation=2, norm_layer=norm_layer,
-                                           dropblock_prob=dropblock_prob)
+                                           dropblock_prob=final_drop)
             self.layer4 = self._make_layer(block, 512, layers[3], stride=1,
                                            dilation=4, norm_layer=norm_layer,
-                                           dropblock_prob=dropblock_prob)
+                                           dropblock_prob=final_drop)
         elif dilation==2:
             self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
                                            dilation=1, norm_layer=norm_layer,
-                                           dropblock_prob=dropblock_prob)
+                                           dropblock_prob=final_drop)
             self.layer4 = self._make_layer(block, 512, layers[3], stride=1,
                                            dilation=2, norm_layer=norm_layer,
-                                           dropblock_prob=dropblock_prob)
+                                           dropblock_prob=final_drop)
         else:
             self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
                                            norm_layer=norm_layer,
-                                           dropblock_prob=dropblock_prob)
+                                           dropblock_prob=final_drop)
             self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                            norm_layer=norm_layer,
-                                           dropblock_prob=dropblock_prob)
+                                           dropblock_prob=final_drop)
         self.avgpool = GlobalAvgPool2d()
-        self.drop = nn.Dropout(final_drop) if final_drop > 0.0 else None
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
         for m in self.modules():

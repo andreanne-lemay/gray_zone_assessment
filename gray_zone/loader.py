@@ -77,7 +77,8 @@ def loader(data_path: str,
     train_loader, val_loader, test_loader = None, None, None
     df_train = split_df[split_df[split_colname] == "train"]
     if len(df_train):
-        sampler, weights = get_balanced_sampler(df_train, label_colname, weights)
+        if balanced:
+            sampler, weights = get_balanced_sampler(df_train, label_colname, weights)
         shuffle = not balanced
         train_ds = Dataset(df_train, data_path, train_transforms, label_colname, image_colname)
         train_loader = torch.utils.data.DataLoader(
@@ -85,7 +86,8 @@ def loader(data_path: str,
 
     df_val = split_df[split_df[split_colname] == "val"]
     if len(df_val):
-        sampler, _ = get_balanced_sampler(df_val, label_colname, weights)
+        if balanced:
+            sampler, _ = get_balanced_sampler(df_val, label_colname, weights)
         val_ds = Dataset(df_val, data_path, val_transforms, label_colname, image_colname)
         val_loader = torch.utils.data.DataLoader(
             val_ds, batch_size=batch_size, num_workers=10, sampler=sampler if balanced else None)

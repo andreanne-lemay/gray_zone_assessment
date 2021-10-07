@@ -19,12 +19,14 @@
         "RepeatChannel": {"repeats":  3},
         "RandRotate": {"range_x": 0.26, "prob": 1.0, "keep_size": true},
         "RandFlip": {"spatial_axis": 0, "prob": 1.0},
+        "Resize": {"spatial_size": [256, 256]},
         "ToTensor": {}
     },
     "val_transforms": {
         "ScaleIntensity": {},
         "AddChannel": {},
         "RepeatChannel": {"repeats":  3},
+        "Resize": {"spatial_size": [256, 256]},
         "ToTensor": {}
     }
 }

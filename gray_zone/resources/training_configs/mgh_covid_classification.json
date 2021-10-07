@@ -1,0 +1,30 @@
+{
+    "architecture": "resnet50",
+    "model_type": "classification",
+    "loss": "ce",
+    "batch_size": 8,
+    "lr": 5e-5,
+    "n_epochs": 75,
+    "device": "cuda:0",
+    "val_metric": "val_loss",
+    "dropout_rate": 0.0,
+    "is_weighted_loss": false,
+    "is_weighted_sampling": false,
+    "seed": 0,
+    "train_frac": 0.65,
+    "test_frac": 0.25,
+    "train_transforms": {
+        "ScaleIntensity": {},
+        "AddChannel": {},
+        "RepeatChannel": {"repeats":  3},
+        "RandRotate": {"range_x": 0.26, "prob": 1.0, "keep_size": true},
+        "RandFlip": {"spatial_axis": 0, "prob": 1.0},
+        "ToTensor": {}
+    },
+    "val_transforms": {
+        "ScaleIntensity": {},
+        "AddChannel": {},
+        "RepeatChannel": {"repeats":  3},
+        "ToTensor": {}
+    }
+}

@@ -50,6 +50,7 @@ def _run_model(output_path: str,
     # Get train, val, test loaders and test dataframe
     weights = (torch.Tensor(param_dict['weights'])).float() if "weights" in param_dict else None
 
+    is_balanced = param_dict['is_weighted_sampling'] or param_dict['is_weighted_loss']
     train_loader, val_loader, test_loader, val_df, test_df, weights = loader(data_path=data_path,
                                                                              output_path=output_path,
                                                                              train_transforms=train_transforms,
@@ -63,8 +64,7 @@ def _run_model(output_path: str,
                                                                              test_frac=param_dict['test_frac'],
                                                                              seed=param_dict['seed'],
                                                                              batch_size=param_dict['batch_size'],
-                                                                             balanced=param_dict[
-                                                                                 'is_weighted_sampling'],
+                                                                             balanced=is_balanced,
                                                                              weights=weights)
 
     # Get model

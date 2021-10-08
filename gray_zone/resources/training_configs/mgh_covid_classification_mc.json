@@ -1,5 +1,5 @@
 {
-    "architecture": "resnet50",
+    "architecture": "densenet121",
     "model_type": "classification",
     "loss": "ce",
     "batch_size": 8,
@@ -19,14 +19,14 @@
         "RepeatChannel": {"repeats":  3},
         "RandRotate": {"range_x": 0.26, "prob": 1.0, "keep_size": true},
         "RandFlip": {"spatial_axis": 0, "prob": 1.0},
-        "Resize": {"spatial_size": [256, 256]},
+        "Resize": {"spatial_size": [512, 512]},
         "ToTensor": {}
     },
     "val_transforms": {
         "ScaleIntensity": {},
         "AddChannel": {},
         "RepeatChannel": {"repeats":  3},
-        "Resize": {"spatial_size": [256, 256]},
+        "Resize": {"spatial_size": [512, 512]},
         "ToTensor": {}
     }
 }

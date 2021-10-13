@@ -1,0 +1,33 @@
+{
+    "architecture": "densenet121",
+    "model_type": "classification",
+    "loss": "qwk",
+    "batch_size": 8,
+    "lr": 1e-5,
+    "n_epochs": 75,
+    "device": "cuda:0",
+    "val_metric": "custom_cervix",
+    "dropout_rate": 0.1,
+    "is_weighted_loss": false,
+    "is_weighted_sampling": true,
+    "weights": [2, 1, 1],
+    "seed": 0,
+    "train_frac": 0.10,
+    "test_frac": 0.89,
+    "train_transforms": {
+        "Transpose": {"indices": [2, 0, 1]},
+        "CenterSpatialCrop": {"roi_size":  [1024, 1024]},
+        "Resize": {"spatial_size": [512, 512]},
+        "ScaleIntensity": {},
+        "RandRotate": {"range_x": 0.26, "prob": 0.5, "keep_size": true},
+        "RandFlip": {"spatial_axis": 0, "prob": 0.5},
+        "ToTensor": {}
+    },
+    "val_transforms": {
+        "Transpose": {"indices": [2, 0, 1]},
+        "CenterSpatialCrop": {"roi_size":  [1024, 1024]},
+        "Resize": {"spatial_size": [512, 512]},
+        "ScaleIntensity": {},
+        "ToTensor": {}
+    }
+}

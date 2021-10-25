@@ -22,7 +22,8 @@ def _run_model(output_path: str,
                image_colname: str,
                split_colname: str,
                patient_colname: str,
-               transfer_learning: str) -> None:
+               transfer_learning: str,
+               test: bool) -> None:
     """ Run deep learning model for training and evaluation for classification tasks. """
     # Create output directory if it doesn't exist
     if not os.path.isdir(output_path):
@@ -82,19 +83,20 @@ def _run_model(output_path: str,
     loss_function = get_loss(param_dict['loss'], param_dict['n_class'], param_dict['is_weighted_loss'],
                              weights, param_dict['device'])
 
-    train(model=model,
-          act=act,
-          train_loader=train_loader,
-          val_loader=val_loader,
-          loss_function=loss_function,
-          optimizer=optimizer,
-          device=param_dict['device'],
-          n_epochs=param_dict['n_epochs'],
-          output_path=output_path,
-          scheduler=scheduler,
-          n_class=param_dict['n_class'],
-          model_type=param_dict['model_type'],
-          val_metric=param_dict['val_metric'])
+    if not test:
+        train(model=model,
+              act=act,
+              train_loader=train_loader,
+              val_loader=val_loader,
+              loss_function=loss_function,
+              optimizer=optimizer,
+              device=param_dict['device'],
+              n_epochs=param_dict['n_epochs'],
+              output_path=output_path,
+              scheduler=scheduler,
+              n_class=param_dict['n_class'],
+              model_type=param_dict['model_type'],
+              val_metric=param_dict['val_metric'])
 
     val_loader = get_unbalanced_loader(val_df, data_path, param_dict['batch_size'], val_transforms,
                                        label_colname, image_colname)
@@ -125,6 +127,7 @@ def _run_model(output_path: str,
               help='Column name in csv associated to the patient id.')
 @click.option('--transfer-learning', '-tf', default=None, help="Path to model (.pth) for fine-tune training (i.e., "
                                                                "start training with weights from other model.)")
+@click.option('--test', '-test', default=None, is_flag=True, help="Option to test already trained model.")
 def run_model(output_path: str,
               param_path: str,
               data_path: str,
@@ -133,10 +136,11 @@ def run_model(output_path: str,
               image_colname: str,
               split_colname: str,
               patient_colname: str,
-              transfer_learning: str) -> None:
+              transfer_learning: str,
+              test: bool) -> None:
     """Train deep learning model using CLI. """
     _run_model(output_path, param_path, data_path, csv_path, label_colname, image_colname, split_colname,
-               patient_colname, transfer_learning)
+               patient_colname, transfer_learning, test)
 
 
 if __name__ == "__main__":

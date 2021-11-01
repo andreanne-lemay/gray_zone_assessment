@@ -12,7 +12,7 @@ from gray_zone.train import train
 from gray_zone.evaluate import evaluate_model
 from gray_zone.loss import get_loss
 from gray_zone.records import get_job_record, save_job_record
-
+from gray_zone.process_model_output import process_output
 
 def _run_model(output_path: str,
                param_path: str,
@@ -112,6 +112,8 @@ def _run_model(output_path: str,
                                 is_mc=param_dict['dropout_rate'] > 0,
                                 image_colname=image_colname,
                                 suffix=suffix)
+            is_ordinal = param_dict['model_type'] == 'ordinal'
+            process_output(output_path, is_ordinal, "predictions" + suffix + ".csv")
 
 
 @click.command()

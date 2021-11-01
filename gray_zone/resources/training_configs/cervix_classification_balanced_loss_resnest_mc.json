@@ -1,5 +1,5 @@
 {
-    "architecture": "densenet121",
+    "architecture": "resnest50",
     "model_type": "classification",
     "loss": "ce",
     "batch_size": 8,

@@ -71,7 +71,7 @@ def get_model_type_params(model_type: str,
     elif model_type == 'classification':
         # Multiclass model
         if n_class > 2:
-            act = Activations(softmax=True)
+            act = torch.nn.Softmax(dim=1)
             out_channels = n_class
         # Binary model
         else:

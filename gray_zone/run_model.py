@@ -69,7 +69,7 @@ def _run_model(output_path: str,
                                                                              weights=weights)
 
     # Get model
-    img_dim = list(train_loader.dataset.__getitem__(0)[0].size())
+    img_dim = list(test_loader.dataset.__getitem__(0)[0].size())
     model, act = get_model(architecture=param_dict['architecture'],
                            model_type=param_dict['model_type'],
                            dropout_rate=param_dict['dropout_rate'],
@@ -101,16 +101,17 @@ def _run_model(output_path: str,
     val_loader = get_unbalanced_loader(val_df, data_path, param_dict['batch_size'], val_transforms,
                                        label_colname, image_colname)
     for data_loader, data_df, suffix in zip([test_loader, val_loader], [test_df, val_df], ['', '_validation']):
-        df = evaluate_model(model=model,
-                            loader=data_loader,
-                            output_path=output_path,
-                            device=param_dict['device'],
-                            act=act,
-                            transforms=val_transforms,
-                            df=data_df,
-                            is_mc=param_dict['dropout_rate'] > 0,
-                            image_colname=image_colname,
-                            suffix=suffix)
+        if data_loader:
+            df = evaluate_model(model=model,
+                                loader=data_loader,
+                                output_path=output_path,
+                                device=param_dict['device'],
+                                act=act,
+                                transforms=val_transforms,
+                                df=data_df,
+                                is_mc=param_dict['dropout_rate'] > 0,
+                                image_colname=image_colname,
+                                suffix=suffix)
 
 
 @click.command()

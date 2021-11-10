@@ -4,7 +4,7 @@ import torch
 import monai
 from monai.transforms import Activations
 
-from gray_zone.models import dropout_resnet, resnest, vit
+from gray_zone.models import dropout_resnet, resnest, vit, vgg
 from gray_zone.models.coral import CoralLayer
 
 
@@ -35,6 +35,10 @@ def get_model(architecture: str,
                          pretrained=True)
     elif 'vit' in architecture:
         model = vit.vit_b16(num_classes=output_channels, image_size=img_dim[1], dropout_rate=dropout_rate)
+    elif 'vgg' in architecture:
+        vgg_model = getattr(vgg, architecture)
+        model = vgg_model(num_classes=output_channels, dropout=dropout_rate)
+
     else:
         raise ValueError("Only ResNet or Densenet models are available.")
 
